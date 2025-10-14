@@ -1,0 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-brand: "Archivo Black", sans-serif;
+  --color-primary: oklab(0.74 0.02 -0.13);
+  --color-secondary: oklab(0.76 -0.07 0.01);
+}
+
+body {
+  background-color: var(--color-gray-50)
+}

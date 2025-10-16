@@ -1,0 +1,27 @@
+meta {
+  name: newuser
+  type: http
+  seq: 1
+}
+
+post {
+  url: 127.0.0.1:8080/newuser
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "id": "9e92ed55-e15c-4cb1-b5ee-1e0278f38b35",
+      "name": "Liam Joshi",
+      "avatar": "https://i.pravatar.cc/150?img=1",
+    
+    
+      "created_at": "2020-11-10T17:34:39.239Z"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

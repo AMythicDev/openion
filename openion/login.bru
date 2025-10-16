@@ -1,0 +1,23 @@
+meta {
+  name: login
+  type: http
+  seq: 2
+}
+
+post {
+  url: 127.0.0.1:8080/login
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email": "johndoe2@mail.com",
+    "password": "12345678"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

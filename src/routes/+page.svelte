@@ -25,9 +25,9 @@
 		<div
 			class="w-full rounded-xl bg-gradient-to-r from-primary to-secondary p-0.5"
 		>
-			<form class="w-full max-h-10 min-h-10 flex flex-col items-center overflow-y-hidden transition-all focus-within:min-h-45 rounded-xl">
+			<form class="w-full max-h-6 min-h-7 flex flex-col items-center overflow-y-hidden transition-all focus-within:min-h-45 rounded-xl">
 				<textarea
-					class="min-h-10 w-full flex-1 bg-white px-2 transition-all outline-none placeholder:text-primary"
+					class="min-h-5 w-full flex-1 bg-white px-2 py-0.5 transition-all outline-none placeholder:text-primary"
 					placeholder="Share your opinions"
 				></textarea>
 				<div class="flex w-full justify-end gap-2 bg-white p-2" tabindex="-1">

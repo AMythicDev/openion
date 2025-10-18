@@ -63,9 +63,6 @@ func main() {
 	router.Use(cors.New(corsConfig))
 
 	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 
 	db, err := gorm.Open(postgres.Open(os.Getenv("DBURL")), &gorm.Config{TranslateError: true})
 	jwt_key := []byte(os.Getenv("JWTKEY"))

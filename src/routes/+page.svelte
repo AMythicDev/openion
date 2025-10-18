@@ -1,5 +1,13 @@
+<script lang="ts">
+	import CommentBox from './CommentBox.svelte';
+  let { data } = $props();
+  console.log(data.parent)
+</script>
+
 <div class="flex flex-col items-center">
-	<main class="flex max-w-1/2 flex-col items-center rounded-md bg-white p-8 shadow-sm">
+	<main
+		class="mb-4 flex max-w-full flex-col items-center rounded-md bg-white p-8 shadow-sm md:max-w-1/2"
+	>
 		<h1 class="mb-4 w-full text-2xl font-bold">
 			Lorem ipsum, dolor sit amet consectetur adipisicing elit.
 		</h1>
@@ -22,13 +30,13 @@
 		<div class="mb-2 w-full">
 			<h2 class="text-xl font-semibold">Comments</h2>
 		</div>
-		<div
-			class="w-full rounded-xl bg-gradient-to-r from-primary to-secondary p-0.5"
-		>
-			<form class="w-full max-h-6 min-h-7 flex flex-col items-center overflow-y-hidden transition-all focus-within:min-h-45 rounded-xl">
+		<div class="w-full rounded-xl bg-gradient-to-r from-primary to-secondary p-0.5">
+			<form
+				class="flex max-h-6 min-h-7 w-full flex-col items-center overflow-y-hidden rounded-xl transition-all focus-within:min-h-45"
+			>
 				<textarea
 					class="min-h-5 w-full flex-1 bg-white px-2 py-0.5 transition-all outline-none placeholder:text-primary"
-					placeholder="Share your opinions"
+					placeholder="Write a comment"
 				></textarea>
 				<div class="flex w-full justify-end gap-2 bg-white p-2" tabindex="-1">
 					<button class="rounded-xl border p-2" tabindex="0">Cancel</button>
@@ -36,5 +44,6 @@
 				</div>
 			</form>
 		</div>
+    <CommentBox parent={data.parent} />
 	</main>
 </div>

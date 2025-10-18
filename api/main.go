@@ -57,7 +57,7 @@ func main() {
 	router := gin.Default()
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowAllOrigins = false
-	corsConfig.AllowOrigins = []string{"http://localhost:5173", "https://openion.netlify.app/"}
+	corsConfig.AllowOrigins = []string{"http://localhost:5173", "https://openion.netlify.app"}
 	corsConfig.AllowCredentials = true
 	corsConfig.ExposeHeaders = append(corsConfig.ExposeHeaders, "Set-Cookie")
 	router.Use(cors.New(corsConfig))

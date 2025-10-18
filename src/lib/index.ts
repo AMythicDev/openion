@@ -1,6 +1,6 @@
 // place files you want to import through the `$lib` alias in this folder.
 
-export const API_URL = "https://openion.onrender.com/"
+export const API_URL = "https://openion.onrender.com"
 
 export function shortenName(name: string): string {
   name = name.trim();

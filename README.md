@@ -1,38 +1,20 @@
-# sv
+# Openion
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A platform to share comments on posts
 
-## Creating a project
+This is the task submission for development team selections for Inter IIT Tech 14.0
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Tech Stack
+- Frontend: Svelte + SvelteKit
+- Styling: tailwindcss
+- UI components: shadcn-svelte
+- API: gin
+- ORM: gorm
+- API Schema Validation: validator
+- Database: PostgreSQL (cloud managed on Render)
+- Deployment: Netlify
 
-```sh
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+## USP
+- Nested commenting system
+- Clean and smooth mobile friendly UI
+- Authentication layer from scratch using JWTs and secure http only cookies

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import CommentBox from './CommentBox.svelte';
-  let { data } = $props();
-  console.log(data.parent)
+	import type { PageProps } from './$types.js';
+	const { data }: PageProps = $props();
 </script>
 
 <div class="flex flex-col items-center">
@@ -27,23 +27,6 @@
 				aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.
 			</p>
 		</div>
-		<div class="mb-2 w-full">
-			<h2 class="text-xl font-semibold">Comments</h2>
-		</div>
-		<div class="w-full rounded-xl bg-gradient-to-r from-primary to-secondary p-0.5">
-			<form
-				class="flex max-h-6 min-h-7 w-full flex-col items-center overflow-y-hidden rounded-xl transition-all focus-within:min-h-45"
-			>
-				<textarea
-					class="min-h-5 w-full flex-1 bg-white px-2 py-0.5 transition-all outline-none placeholder:text-primary"
-					placeholder="Write a comment"
-				></textarea>
-				<div class="flex w-full justify-end gap-2 bg-white p-2" tabindex="-1">
-					<button class="rounded-xl border p-2" tabindex="0">Cancel</button>
-					<button class="rounded-xl bg-secondary px-4" tabindex="0">Comment</button>
-				</div>
-			</form>
-		</div>
-    <CommentBox parent={data.parent} />
+		<CommentBox parent={data.parent} />
 	</main>
 </div>

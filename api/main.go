@@ -34,6 +34,19 @@ type Login struct {
 	Password string `json:"password" binding:"required"`
 }
 
+type NewComment struct {
+	Id        uint   `json:"id" binding:"-"`
+	ParentId  *uint  `json:"parent_id" binding:"required"`
+	Text      string `json:"text" binding:"required"`
+	Upvotes   uint   `json:"upvotes" binding:"-"`
+	CreatedAt string `json:"created_at" binding:"-"`
+}
+
+type UpdatePost struct {
+	Id      uint `json:"id" binding:"required"`
+	Upvotes uint `json:"upvotes" binding:"required"`
+}
+
 type User struct {
 	Id        string    `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	Name      string    `gorm:"not null"`
@@ -48,9 +61,32 @@ type Comment struct {
 	Id        uint  `gorm:"type:int autoIncrement primaryKey"`
 	ParentId  *uint `gorm:"type:int;default:null"`
 	Text      string
-	Upvotes   uint
+	Upvotes   uint   `gorm:"type:int;default:0"`
 	CreatedAt string `gorm:"type:timestamptz;default:now()"`
 	UserId    string `gorm:"type:uuid"`
+}
+
+func JWTAuth(jwt_key []byte, db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		val, err := c.Cookie("jwt")
+		if err == nil {
+			token, err := jwt.ParseWithClaims(val, &jwt.RegisteredClaims{}, func(t *jwt.Token) (any, error) {
+				return jwt_key, nil
+			}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
+
+			if err != nil {
+				c.Status(http.StatusUnauthorized)
+				c.Abort()
+				return
+			}
+			if claims, ok := token.Claims.(*jwt.RegisteredClaims); ok && token.Valid {
+				c.Set("user_id", claims.Subject)
+				c.Next()
+			}
+		}
+		c.Status(http.StatusOK)
+		c.Abort()
+	}
 }
 
 func main() {
@@ -164,7 +200,7 @@ func main() {
 		}
 		offset := (page - 1) * pageSize
 
-		query := gorm.G[map[string]any](db).Table("comments").Select("comments.id, parent_id, text, upvotes, comments.created_at, users.name AS user_name, users.avatar AS user_avatar").Joins(clause.JoinTarget{Association: "inner join users on comments.user_id = users.id"}, nil).Limit(pageSize).Offset(offset).Order("created_at ASC")
+		query := gorm.G[map[string]any](db).Table("comments").Select("comments.id, parent_id, text, upvotes, comments.created_at, users.name AS user_name, users.avatar AS user_avatar").Joins(clause.JoinTarget{Association: "inner join users on comments.user_id = users.id"}, nil).Limit(pageSize).Offset(offset).Order("created_at")
 
 		counterQuery := gorm.G[map[string]any](db).Select("COUNT(r.id) AS replies").Table("comments c").Joins(clause.JoinTarget{Association: "left join comments r on r.parent_id = c.id"}, nil).Group("c.id").Order("c.created_at").Limit(pageSize)
 
@@ -222,32 +258,90 @@ func main() {
 		})
 	})
 
-	router.GET("/logout", func(c *gin.Context) {
+	router.GET("/getcomment", func(c *gin.Context) {
+		idStr := c.Query("id")
+		id, err := strconv.Atoi(idStr)
+
+		if idStr == "" || err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "comment id does not exist or invalid"})
+			return
+		}
+
+		ctx := context.Background()
+
+		comment, err := gorm.G[map[string]any](db).Table("comments").Select("comments.id, parent_id, text, upvotes, comments.created_at, users.name AS user_name, users.avatar AS user_avatar").Joins(clause.JoinTarget{Association: "inner join users on comments.user_id = users.id"}, nil).Where("comments.id = ?", id).Find(ctx)
+		//
+		if idStr == "" || err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "comment id does not exist or invalid"})
+			return
+		}
+
+		counter, _ := gorm.G[map[string]any](db).Select("COUNT(r.id) AS replies").Table("comments c").Joins(clause.JoinTarget{Association: "left join comments r on r.parent_id = c.id"}, nil).Where("c.id = ?", id).Find(ctx)
+		_ = counter
+
+		comment[0]["replies"] = counter[0]["replies"]
+
+		c.JSON(http.StatusOK, comment[0])
+	})
+
+	router.POST("/newcomment", JWTAuth(jwt_key, db), func(c *gin.Context) {
+		var json NewComment
+		if err := c.ShouldBindJSON(&json); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		user_id, _ := c.Get("user_id")
+		ctx := context.Background()
+		comment := Comment{
+			Id:        json.Id,
+			ParentId:  json.ParentId,
+			Upvotes:   json.Upvotes,
+			Text:      json.Text,
+			CreatedAt: json.CreatedAt,
+			UserId:    user_id.(string),
+		}
+
+		result := gorm.WithResult()
+		err := gorm.G[Comment](db, result).Create(ctx, &comment)
+
+		if err != nil {
+			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"id":         comment.Id,
+			"parent_id":  comment.ParentId,
+			"upvotes":    comment.Upvotes,
+			"text":       comment.Text,
+			"created_at": comment.CreatedAt,
+			"user_id":    comment.UserId,
+			"replies":    0,
+		})
+	})
+
+	router.PATCH("/updatepost", JWTAuth(jwt_key, db), func(c *gin.Context) {
+		var json UpdatePost
+		if err := c.ShouldBindJSON(&json); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		ctx := context.Background()
+		result := gorm.WithResult()
+		_, err := gorm.G[Comment](db, result).Where("id = ?", json.Id).Update(ctx, "upvotes", json.Upvotes)
+
+		if err != nil {
+			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.Status(http.StatusOK)
+	})
+
+	router.GET("/logout", JWTAuth(jwt_key, db), func(c *gin.Context) {
 		c.SetCookie("jwt", "", 0, "/", "localhost", false, true)
 	})
 
 	router.Run()
-}
-
-func JWTAuth(jwt_key []byte, db *gorm.DB) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		val, err := c.Cookie("jwt")
-		if err == nil {
-			token, err := jwt.ParseWithClaims(val, &jwt.RegisteredClaims{}, func(t *jwt.Token) (any, error) {
-				return jwt_key, nil
-			}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
-
-			if err != nil {
-				c.Status(http.StatusUnauthorized)
-				c.Abort()
-				return
-			}
-			if claims, ok := token.Claims.(*jwt.RegisteredClaims); ok && token.Valid {
-				c.Set("user_id", claims.Subject)
-				c.Next()
-			}
-		}
-		c.Status(http.StatusOK)
-		c.Abort()
-	}
 }

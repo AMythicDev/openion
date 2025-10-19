@@ -1,0 +1,20 @@
+meta {
+  name: getcomment
+  type: http
+  seq: 4
+}
+
+get {
+  url: 127.0.0.1:8080/getcomment?id=46
+  body: none
+  auth: inherit
+}
+
+params:query {
+  id: 46
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
